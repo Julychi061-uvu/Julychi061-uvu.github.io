@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的小屋 - 学习笔记站</title>
+<style>
+/* SECTION: reset-and-base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: "Microsoft YaHei", "SimSun", sans-serif;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  /* 粉绿棋盘格平铺背景 */
+  background-color: #fce4ec;
+  background-image:
+    repeating-conic-gradient(#b2dfdb 0% 25%, transparent 0% 50%) 0 0 / 40px 40px;
+}
+a { color: #e91e63; text-decoration: none; }
+a:hover { text-decoration: underline; color: #c2185b; }
+
+/* SECTION: layout */
+.page-wrap {
+  max-width: 960px;
+  margin: 20px auto;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.sidebar-left, .sidebar-right { width: 200px; flex-shrink: 0; }
+.main-content { flex: 1; min-width: 0; }
+
+/* SECTION: common-card */
+.card {
+  background: #fff;
+  border: 2px solid #f8bbd0;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 2px 2px 0 #f48fb1;
+}
+.card-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #00695c;
+  border-bottom: 2px dashed #b2dfdb;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+/* SECTION: header-banner */
+.site-header {
+  text-align: center;
+  padding: 20px 12px;
+  background: linear-gradient(135deg, #fce4ec 0%, #b2dfdb 100%);
+  border: 3px double #f48fb1;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+.site-title {
+  font-size: 28px;
+  color: #00695c;
+  letter-spacing: 4px;
+  text-shadow: 1px 1px 0 #f8bbd0;
+}
+.site-subtitle {
+  font-size: 13px;
+  color: #888;
+  margin-top: 4px;
+}
+
+/* SECTION: nav-capsule */
+.nav-bar {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.nav-btn {
+  display: inline-block;
+  padding: 6px 18px;
+  background: #f48fb1;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 2px solid #ec407a;
+  transition: all 0.2s;
+  user-select: none;
+}
+.nav-btn:hover, .nav-btn.active {
+  background: #00897b;
+  border-color: #00695c;
+  text-decoration: none;
+}
+
+/* SECTION: avatar */
+.avatar-box { text-align: center; }
+.avatar-placeholder {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  border: 3px solid #f48fb1;
+  background: #fce4ec;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #f48fb1;
+}
+.avatar-name { font-weight: bold; color: #00695c; font-size: 15px; }
+.avatar-desc { font-size: 12px; color: #888; margin-top: 2px; }
+
+/* SECTION: marquee */
+.marquee-wrap {
+  background: #e0f2f1;
+  border: 1px dashed #80cbc4;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #00695c;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-text {
+  display: inline-block;
+  animation: marquee-scroll 12s linear infinite;
+}
+@keyframes marquee-scroll {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* SECTION: visitor-counter */
+.counter-box { text-align: center; font-size: 12px; color: #888; }
+.counter-num {
+  display: inline-block;
+  background: #333;
+  color: #0f0;
+  font-family: "Courier New", monospace;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+/* SECTION: friend-buttons */
+.friend-wall { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.friend-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px; height: 31px;
+  font-size: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fafafa;
+  color: #555;
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.1;
+  padding: 2px;
+  transition: all 0.2s;
+}
+.friend-btn:hover { background: #e0f2f1; border-color: #80cbc4; text-decoration: none; }
+
+/* SECTION: category-nav */
+.cat-list { list-style: none; }
+.cat-list li {
+  padding: 5px 8px;
+  border-bottom: 1px dotted #ddd;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.cat-list li:hover { background: #fce4ec; }
+.cat-list li::before { content: "▸ "; color: #f48fb1; }
+.cat-count { float: right; font-size: 11px; color: #aaa; }
+
+/* SECTION: search-box */
+.search-box {
+  display: flex;
+  gap: 4px;
+}
+.search-input {
+  flex: 1;
+  padding: 5px 8px;
+  border: 2px solid #f8bbd0;
+  border-radius: 8px;
+  font-size: 13px;
+  outline: none;
+}
+.search-input:focus { border-color: #00897b; }
+.search-btn {
+  padding: 5px 12px;
+  background: #00897b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.search-btn:hover { background: #00695c; }
+
+/* SECTION: music-player */
+.music-player {
+  background: #fce4ec;
+  border: 1px solid #f8bbd0;
+  border-radius: 8px;
+  padding: 8px;
+  text-align: center;
+}
+.music-title { font-size: 12px; color: #00695c; margin-bottom: 6px; }
+.music-controls { display: flex; justify-content: center; gap: 8px; }
+.music-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid #f48fb1;
+  background: #fff;
+  color: #e91e63;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.music-btn:hover { background: #f48fb1; color: #fff; }
+.music-status { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+/* SECTION: article-list */
+.article-item {
+  padding: 12px;
+  border-bottom: 1px dashed #eee;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.article-item:hover { background: #fce4ec; }
+.article-item:last-child { border-bottom: none; }
+.article-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.article-date { font-size: 12px; color: #aaa; }
+.article-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: #fff;
+}
+.tag-tech { background: #00897b; }
+.tag-life { background: #f48fb1; }
+.tag-code { background: #7e57c2; }
+.tag-sec { background: #ef5350; }
+.article-title { font-size: 16px; font-weight: bold; color: #333; }
+.article-excerpt { font-size: 13px; color: #777; margin-top: 4px; }
+
+/* SECTION: article-detail */
+.article-detail { display: none; }
+.article-detail.visible { display: block; }
+.back-link {
+  display: inline-block;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #00897b;
+  cursor: pointer;
+}
+.back-link:hover { text-decoration: underline; }
+.detail-title { font-size: 22px; color: #00695c; margin-bottom: 8px; }
+.detail-meta { font-size: 12px; color: #aaa; margin-bottom: 16px; }
+.detail-body { font-size: 14px; line-height: 1.8; color: #444; }
+.detail-body p { margin-bottom: 12px; }
+.detail-body h3 { color: #00695c; margin: 16px 0 8px; font-size: 16px; }
+/* 复古终端风代码块 */
+.detail-body pre {
+  background: #1a1a2e;
+  color: #0f0;
+  padding: 12px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  margin: 12px 0;
+  border: 1px solid #333;
+}
+.detail-body code {
+  background: #e0f2f1;
+  color: #00695c;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+}
+.detail-body pre code { background: none; color: inherit; padding: 0; }
+
+/* SECTION: footer */
+.site-footer {
+  text-align: center;
+  padding: 16px;
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 12px;
+}
+
+/* SECTION: responsive */
+@media (max-width: 768px) {
+  .page-wrap { flex-direction: column; margin: 10px; }
+  .sidebar-left, .sidebar-right { width: 100%; }
+  .site-title { font-size: 22px; }
+  .nav-btn { padding: 5px 14px; font-size: 12px; }
+  .friend-btn { width: 78px; height: 28px; font-size: 9px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SECTION: page-container -->
+<div class="page-wrap">
+
+  <!-- SECTION: left-sidebar -->
+  <aside class="sidebar-left">
+    <!-- 站长信息 -->
+    <div class="card avatar-box">
+      <div class="avatar-placeholder">🏠</div>
+      <div class="avatar-name">我的小屋</div>
+      <div class="avatar-desc">408 / 代码 / 信安<br>学习中…</div>
+    </div>
+
+    <!-- 滚动公告 -->
+    <div class="card">
+      <div class="card-title">📢 公告栏</div>
+      <div class="marquee-wrap">
+        <span class="marquee-text">欢迎来到我的小屋！最近在啃408和CTF，更新随缘～欢迎交换友链！</span>
+      </div>
+    </div>
+
+    <!-- 访客计数 -->
+    <div class="card counter-box">
+      <div class="card-title">👀 访客计数</div>
+      <div>本站已被访问</div>
+      <div class="counter-num" id="visitorCount">000000</div>
+      <div style="margin-top:4px;">次</div>
+    </div>
+
+    <!-- 友情按钮墙 -->
+    <div class="card">
+      <div class="card-title">🔗 友情链接</div>
+      <div class="friend-wall">
+        <a class="friend-btn" href="#" title="示例友链1">学长博客</a>
+        <a class="friend-btn" href="#" title="示例友链2">CTF Wiki</a>
+        <a class="friend-btn" href="#" title="示例友链3">OI Wiki</a>
+        <a class="friend-btn" href="#" title="示例友链4">菜鸟教程</a>
+        <a class="friend-btn" href="#" title="示例友链5">力扣刷题</a>
+        <a class="friend-btn" href="#" title="申请友链">+ 申请</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- SECTION: main-area -->
+  <main class="main-content">
+    <!-- 站点头部 -->
+    <div class="site-header">
+      <div class="site-title">✿ 我的小屋 ✿</div>
+      <div class="site-subtitle">一个记录学习与生活的古早小站</div>
+    </div>
+
+    <!-- 胶囊导航 -->
+    <nav class="nav-bar">
+      <span class="nav-btn active" data-nav="home">首页</span>
+      <span class="nav-btn" data-nav="408">408笔记</span>
+      <span class="nav-btn" data-nav="code">编程语言</span>
+      <span class="nav-btn" data-nav="security">信息安全</span>
+      <span class="nav-btn" data-nav="life">生活随笔</span>
+    </nav>
+
+    <!-- 文章列表视图 -->
+    <div id="listView" class="card">
+      <div class="card-title" id="listTitle">📝 最新文章</div>
+      <div id="articleList">
+        <!-- JS 渲染文章列表 -->
+      </div>
+    </div>
+
+    <!-- 文章详情视图 -->
+    <div id="detailView" class="card article-detail">
+      <span class="back-link" id="backBtn">← 返回列表</span>
+      <h1 class="detail-title" id="detailTitle"></h1>
+      <div class="detail-meta" id="detailMeta"></div>
+      <div class="detail-body" id="detailBody"></div>
+    </div>
+  </main>
+
+  <!-- SECTION: right-sidebar -->
+  <aside class="sidebar-right">
+    <!-- 分类导航 -->
+    <div class="card">
+      <div class="card-title">📂 分类目录</div>
+      <ul class="cat-list" id="catList">
+        <li data-cat="all">全部文章 <span class="cat-count" id="countAll"></span></li>
+        <li data-cat="408">408考研 <span class="cat-count" id="count408"></span></li>
+        <li data-cat="code">编程语言 <span class="cat-count" id="countCode"></span></li>
+        <li data-cat="security">信息安全 <span class="cat-count" id="countSec"></span></li>
+        <li data-cat="life">生活随笔 <span class="cat-count" id="countLife"></span></li>
+      </ul>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="card">
+      <div class="card-title">🔍 站内搜索</div>
+      <div class="search-box">
+        <input class="search-input" id="searchInput" type="text" placeholder="搜文章标题…">
+        <button class="search-btn" id="searchBtn">搜</button>
+      </div>
+    </div>
+
+    <!-- 背景音乐播放器 -->
+    <div class="card">
+      <div class="card-title">🎵 背景音乐</div>
+      <div class="music-player">
+        <div class="music-title" id="musicName">♪ 轻音乐 - 午后阳光</div>
+        <div class="music-controls">
+          <button class="music-btn" id="prevBtn" title="上一首">⏮</button>
+          <button class="music-btn" id="playBtn" title="播放/暂停">▶</button>
+          <button class="music-btn" id="nextBtn" title="下一首">⏭</button>
+        </div>
+        <div class="music-status" id="musicStatus">已暂停</div>
+      </div>
+    </div>
+
+    <!-- 站点信息 -->
+    <div class="card">
+      <div class="card-title">ℹ️ 站点信息</div>
+      <div style="font-size:12px;color:#777;line-height:1.8;">
+        建站日期：2026-09-21<br>
+        最后更新：2026-09-21<br>
+        文章总数：<span id="totalArticles">0</span> 篇<br>
+        运行天数：<span id="runDays">0</span> 天
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- SECTION: footer -->
+<footer class="site-footer">
+  ✿ 我的小屋 © 2026 | 用爱发电，纯手写静态页 ✿<br>
+  Powered by HTML/CSS/JS · Hosted on GitHub Pages
+</footer>
+
+<script>
+/* SECTION: mock-data */
+var articles = [
+  {
+    id: 1,
+    title: "数据结构·链表基础与常见操作总结",
+    date: "2026-09-20",
+    cat: "408",
+    tag: "技术",
+    excerpt: "单链表、双链表、循环链表的插入删除查找，附手绘图示和C语言实现。",
+    body: '<h3>一、单链表节点定义</h3><p>链表是最基础的线性表链式存储结构，每个节点包含数据域和指针域：</p><pre><code>typedef struct Node {\n    int data;\n    struct Node *next;\n} Node;</code></pre><h3>二、头插法建表</h3><p>每次新节点插在头部，时间复杂度 O(n)，但建表顺序与输入相反：</p><pre><code>Node* createByHead(int arr[], int n) {\n    Node *head = NULL;\n    for (int i = 0; i < n; i++) {\n        Node *p = (Node*)malloc(sizeof(Node));\n        p->data = arr[i];\n        p->next = head;\n        head = p;\n    }\n    return head;\n}</code></pre><h3>三、注意事项</h3><p>释放链表时要保存 next 指针再 free 当前节点，避免野指针。考试常考：带头结点 vs 不带头结点的边界处理差异。</p>'
+  },
+  {
+    id: 2,
+    title: "Python 装饰器从入门到能用",
+    date: "2026-09-18",
+    cat: "code",
+    tag: "代码",
+    excerpt: "搞懂 @decorator 语法糖背后的闭包原理，附计时器和日志两个实战例子。",
+    body: '<h3>什么是装饰器</h3><p>装饰器本质是一个接受函数作为参数、返回新函数的高阶函数。<code>@decorator</code> 只是 <code>func = decorator(func)</code> 的语法糖。</p><pre><code>import time\n\ndef timer(func):\n    def wrapper(*args, **kwargs):\n        start = time.time()\n        result = func(*args, **kwargs)\n        print(f"{func.__name__} 耗时 {time.time()-start:.4f}s")\n        return result\n    return wrapper\n\n@timer\ndef slow_add(a, b):\n    time.sleep(1)\n    return a + b</code></pre><p>调用 <code>slow_add(1,2)</code> 会自动打印耗时。这就是装饰器的核心价值：不改原函数代码，透明地增加功能。</p>'
+  },
+  {
+    id: 3,
+    title: "CTF Web题·SQL注入入门笔记",
+    date: "2026-09-15",
+    cat: "security",
+    tag: "安全",
+    excerpt: "从联合查询到布尔盲注，记录第一次打通SQLi题目的完整思路。",
+    body: '<h3>判断注入点</h3><p>在输入框输入 <code>1\' OR \'1\'=\'1</code>，如果页面返回异常或所有数据，大概率存在字符型注入。</p><h3>联合查询步骤</h3><pre><code>-- 1. 判断列数\n1\' ORDER BY 3 --\n\n-- 2. 确定回显位\n1\' UNION SELECT 1,2,3 --\n\n-- 3. 爆库名\n1\' UNION SELECT 1,database(),3 --</code></pre><h3>安全提醒</h3><p>仅在授权靶场练习，严禁对真实站点测试。学习目的是理解漏洞原理并学会防御（预编译参数化查询）。</p>'
+  },
+  {
+    id: 4,
+    title: "操作系统·进程同步经典问题",
+    date: "2026-09-12",
+    cat: "408",
+    tag: "技术",
+    excerpt: "生产者消费者、读者写者、哲学家进餐，三个问题的信号量解法对比。",
+    body: '<h3>生产者-消费者</h3><p>核心是三个信号量：<code>mutex</code>（互斥访问缓冲区）、<code>empty</code>（空槽位数）、<code>full</code>（满槽位数）。注意 P 操作顺序：先 P(empty/full) 再 P(mutex)，否则死锁。</p><pre><code>// 生产者\nP(empty);\nP(mutex);\n// 放入产品\nV(mutex);\nV(full);</code></pre><h3>易错点</h3><p>考试最爱考：把 P(mutex) 放在 P(empty) 前面会怎样？答：当缓冲区满时，生产者持有 mutex 后阻塞在 P(empty)，消费者因拿不到 mutex 无法取产品，双方互相等待→死锁。</p>'
+  },
+  {
+    id: 5,
+    title: "开学第一周碎碎念",
+    date: "2026-09-10",
+    cat: "life",
+    tag: "生活",
+    excerpt: "新学期flag立了一堆，希望这次能坚持久一点哈哈。",
+    body: '<p>终于把这个小站搭起来了！用的是纯手写HTML，古早风格致敬一下2005年的个人主页时代。</p><p>这学期的计划：</p><p>1. 408四门课过一遍，重点攻克组成原理<br>2. Python 刷完 LeetCode Hot 100<br>3. CTF 每周至少做一道 Web 题<br>4. 坚持写博客记录（这条最容易鸽）</p><p>如果你也是计算机专业的同学，欢迎留言交流呀～</p>'
+  },
+  {
+    id: 6,
+    title: "计算机网络·TCP三次握手为什么是三次",
+    date: "2026-09-08",
+    cat: "408",
+    tag: "技术",
+    excerpt: "两次不行吗？四次浪费吗？从防止历史连接和同步双方状态两个角度解释。",
+    body: '<h3>核心原因</h3><p>三次握手的本质是<strong>双方各自确认对方的收发能力正常</strong>。两次只能单向确认，四次多一次无意义。</p><h3>防止历史连接</h3><p>假设A之前发过一个SYN滞留在网络中，后来A重新发起连接。如果只有两次握手，B收到旧SYN就认为连接建立，但A并不认可这个旧连接→资源浪费。第三次ACK让A有机会拒绝不合法的连接。</p><h3>面试答题模板</h3><p>① 同步双方ISN ② 确认双方收发正常 ③ 防止已失效的连接请求到达服务端导致资源浪费。</p>'
+  }
+];
+
+/* SECTION: render-functions */
+var currentCat = 'all';
+var listView = document.getElementById('listView');
+var detailView = document.getElementById('detailView');
+var articleListEl = document.getElementById('articleList');
+var listTitleEl = document.getElementById('listTitle');
+
+function getTagClass(cat) {
+  var map = { '408': 'tag-tech', 'code': 'tag-code', 'security': 'tag-sec', 'life': 'tag-life' };
+  return map[cat] || 'tag-tech';
+}
+
+function renderList(filterCat, keyword) {
+  var filtered = articles.filter(function(a) {
+    var catMatch = filterCat === 'all' || a.cat === filterCat;
+    var kwMatch = !keyword || a.title.indexOf(keyword) !== -1;
+    return catMatch && kwMatch;
+  });
+  var html = '';
+  if (filtered.length === 0) {
+    html = '<div style="text-align:center;padding:24px;color:#aaa;">暂无文章～</div>';
+  } else {
+    filtered.forEach(function(a) {
+      html += '<div class="article-item" data-id="' + a.id + '">'
+        + '<div class="article-meta">'
+        + '<span class="article-date">' + a.date + '</span>'
+        + '<span class="article-tag ' + getTagClass(a.cat) + '">' + a.tag + '</span>'
+        + '</div>'
+        + '<div class="article-title">' + a.title + '</div>'
+        + '<div class="article-excerpt">' + a.excerpt + '</div>'
+        + '</div>';
+    });
+  }
+  articleListEl.innerHTML = html;
+  // 绑定点击
+  var items = articleListEl.querySelectorAll('.article-item');
+  items.forEach(function(el) {
+    el.addEventListener('click', function() {
+      openArticle(parseInt(el.getAttribute('data-id')));
+    });
+  });
+}
+
+function openArticle(id) {
+  var art = articles.find(function(a) { return a.id === id; });
+  if (!art) return;
+  document.getElementById('detailTitle').textContent = art.title;
+  document.getElementById('detailMeta').textContent = art.date + ' · ' + art.tag;
+  document.getElementById('detailBody').innerHTML = art.body;
+  listView.style.display = 'none';
+  detailView.classList.add('visible');
+  window.scrollTo(0, 0);
+}
+
+function backToList() {
+  detailView.classList.remove('visible');
+  listView.style.display = 'block';
+}
+
+document.getElementById('backBtn').addEventListener('click', backToList);
+
+/* SECTION: nav-and-filter */
+var navBtns = document.querySelectorAll('.nav-btn');
+navBtns.forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    navBtns.forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    var nav = btn.getAttribute('data-nav');
+    if (nav === 'home') {
+      currentCat = 'all';
+      listTitleEl.textContent = '📝 最新文章';
+    } else {
+      currentCat = nav;
+      var names = { '408': '408笔记', 'code': '编程语言', 'security': '信息安全', 'life': '生活随笔' };
+      listTitleEl.textContent = '📝 ' + (names[nav] || nav);
+    }
+    renderList(currentCat, '');
+    document.getElementById('searchInput').value = '';
+    backToList();
+  });
+});
+
+// 侧栏分类点击
+var catItems = document.querySelectorAll('.cat-list li');
+catItems.forEach(function(li) {
+  li.addEventListener('click', function() {
+    var cat = li.getAttribute('data-cat');
+    currentCat = cat;
+    var names = { 'all': '最新文章', '408': '408笔记', 'code': '编程语言', 'security': '信息安全', 'life': '生活随笔' };
+    listTitleEl.textContent = '📝 ' + (names[cat] || cat);
+    renderList(currentCat, '');
+    backToList();
+  });
+});
+
+/* SECTION: search */
+document.getElementById('searchBtn').addEventListener('click', function() {
+  var kw = document.getElementById('searchInput').value.trim();
+  renderList(currentCat, kw);
+  backToList();
+});
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    var kw = this.value.trim();
+    renderList(currentCat, kw);
+    backToList();
+  }
+});
+
+/* SECTION: visitor-counter */
+(function() {
+  var count = parseInt(localStorage.getItem('retroBlogVisits') || '0', 10);
+  count++;
+  localStorage.setItem('retroBlogVisits', String(count));
+  var str = String(count);
+  while (str.length < 6) str = '0' + str;
+  document.getElementById('visitorCount').textContent = str;
+})();
+
+/* SECTION: site-stats */
+(function() {
+  document.getElementById('totalArticles').textContent = articles.length;
+  var start = new Date('2026-09-21');
+  var now = new Date();
+  var days = Math.max(1, Math.floor((now - start) / 86400000) + 1);
+  document.getElementById('runDays').textContent = days;
+  // 分类计数
+  var counts = { all: articles.length, '408': 0, code: 0, security: 0, life: 0 };
+  articles.forEach(function(a) { if (counts[a.cat] !== undefined) counts[a.cat]++; });
+  document.getElementById('countAll').textContent = counts.all;
+  document.getElementById('count408').textContent = counts['408'];
+  document.getElementById('countCode').textContent = counts.code;
+  document.getElementById('countSec').textContent = counts.security;
+  document.getElementById('countLife').textContent = counts.life;
+})();
+
+/* SECTION: music-player-mock */
+(function() {
+  var tracks = ['轻音乐 - 午后阳光', '钢琴曲 - 星空下', '八音盒 - 童年回忆'];
+  var idx = 0;
+  var playing = false;
+  var playBtn = document.getElementById('playBtn');
+  var statusEl = document.getElementById('musicStatus');
+  var nameEl = document.getElementById('musicName');
+
+  function updateUI() {
+    nameEl.textContent = '♪ ' + tracks[idx];
+    playBtn.textContent = playing ? '⏸' : '▶';
+    statusEl.textContent = playing ? '播放中…' : '已暂停';
+  }
+
+  playBtn.addEventListener('click', function() {
+    playing = !playing;
+    updateUI();
+  });
+  document.getElementById('prevBtn').addEventListener('click', function() {
+    idx = (idx - 1 + tracks.length) % tracks.length;
+    updateUI();
+  });
+  document.getElementById('nextBtn').addEventListener('click', function() {
+    idx = (idx + 1) % tracks.length;
+    updateUI();
+  });
+  updateUI();
+})();
+
+/* SECTION: init */
+renderList('all', '');
+</script>
+</body>
+</html>
